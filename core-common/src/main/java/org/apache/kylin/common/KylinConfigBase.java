@@ -653,4 +653,8 @@ abstract public class KylinConfigBase implements Serializable {
     public String getHBaseMaxConnectionThreads() {
         return getOptional("kylin.query.hbase.hconnection.threads.max", "3072");
     }
+        
+    public String getPatchedFuzzyRowFilterVersion() {
+        return this.getOptional("kylin.hbase.filter.fuzzy.row.filter.version", "1.1.3");
+    }
 }
