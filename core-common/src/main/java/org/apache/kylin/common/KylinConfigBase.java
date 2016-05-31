@@ -391,6 +391,10 @@ abstract public class KylinConfigBase implements Serializable {
         return Integer.parseInt(getOptional("kylin.cube.aggrgroup.max.combination", "4096"));
     }
 
+    public boolean getCubeAggrGroupIsMandatoryOnlyValid() {
+        return Boolean.parseBoolean(getOptional("kylin.cube.aggrgroup.isMandatoryOnlyValid", "false"));
+    }
+
     public String[] getCubeDimensionCustomEncodingFactories() {
         return getOptionalStringArray("kylin.cube.dimension.customEncodingFactories", new String[0]);
     }
