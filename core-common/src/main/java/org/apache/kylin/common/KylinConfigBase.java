@@ -650,7 +650,7 @@ abstract public class KylinConfigBase implements Serializable {
         return Integer.parseInt(getOptional("kylin.job.cubing.inmem.sampling.hll.precision", "14"));
     }
 
-    public String getHBaseMaxConnectionThreads() {
-        return getOptional("kylin.query.hbase.hconnection.threads.max", "3072");
+    public int getHBaseMaxConnectionThreads() {
+        return Integer.parseInt(getOptional("kylin.query.hbase.hconnection.threads.max", "3072"));
     }
 }
