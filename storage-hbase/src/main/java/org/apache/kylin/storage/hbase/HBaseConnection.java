@@ -94,7 +94,7 @@ public class HBaseConnection {
             // copy from HConnectionImplementation.getBatchPool()
             int maxThreads = config.getHBaseMaxConnectionThreads();
             int coreThreads = config.getHBaseCoreConnectionThreads();
-            long keepAliveTime = 60;
+            long keepAliveTime = config.getHBaseConnectionThreadPoolAliveSeconds();
             LinkedBlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>(maxThreads * 100);
             ThreadPoolExecutor tpe = new ThreadPoolExecutor(coreThreads, maxThreads, keepAliveTime, TimeUnit.SECONDS, workQueue, //
                     Threads.newDaemonThreadFactory("kylin-coproc-"));
