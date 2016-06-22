@@ -51,7 +51,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- *
+ * kylin使用Spring框架提供RESTful接口
+ * jobController实现了 InitializingBean接口，
+ *      即，在初始化bean的时候spring会调用这个类实现的afterPropertiesSet方法执行初始化操作
  */
 @Controller
 @RequestMapping(value = "jobs")
