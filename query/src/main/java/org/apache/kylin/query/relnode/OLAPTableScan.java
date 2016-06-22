@@ -69,6 +69,11 @@ import org.apache.kylin.query.schema.OLAPTable;
 import com.google.common.base.Preconditions;
 
 /**
+ * Kylin注册了几个优化规则，每一个优化规则将对应的物理算子转换成Kylin自己的 OLAPPxxxRel算子，
+ *
+ * 然后再将每一个算子根据本次查询的参数生成Calcite自身的EnumerableXXX算子执行，
+ *
+ * 但是 OLAPTableScan并不会转换成 Calcite算子， 同样的还有OLAPJoinRel（当执行的sql有 join语句时产生该算子）
  */
 public class OLAPTableScan extends TableScan implements OLAPRel, EnumerableRel {
 
@@ -217,15 +222,31 @@ public class OLAPTableScan extends TableScan implements OLAPRel, EnumerableRel {
     public Result implement(EnumerableRelImplementor implementor, Prefer pref) {
 
         context.setReturnTupleInfo(rowType, columnRowType);
+        // 产生要执行的函数名称
         String execFunction = genExecFunc();
 
         PhysType physType = PhysTypeImpl.of(implementor.getTypeFactory(), this.rowType, pref.preferArray());
+
+        // 根据MethodCallExpression对象 exprCall执行 Blocks.toBlock生成对应的代码段（在bind函数中调用）
         MethodCallExpression exprCall = Expressions.call(table.getExpression(OLAPTable.class), execFunction, implementor.getRootExpression(), Expressions.constant(context.id));
         return implementor.result(physType, Blocks.toBlock(exprCall));
     }
 
+    /**
+     * 由于在Kylin中预计算了所有可能的组合值保存在hbase中，rowkey为值的组合，
+     * 所以事实表中的数据经过计算后都保存在HBase中，只能通过访问HBase获取， 即executeOLAPQuery函数
+     * 而 Kylin会保存所有维度表的信息，在内存中生成SnapshotTable，
+     * 这样对维度表的查询则不需要扫描HBase，即executeLookupTableQuery函数
+     * @return
+     */
     private String genExecFunc() {
         // if the table to scan is not the fact table of cube, then it's a lookup table
+        // 如果要 scan的表不是 cube的事实表，那就是一个查询表（lookup table）
+        // 根据之前生成的查询上下文 OLAPContext，如果本次查询没有join 并且查询的表不是当前使用的cube的事实表，
+        //      则使用executeLookupTableQuery函数
+        // 否则，（有join 或者查询事实表）则使用executeOLAPQuery函数
+        // OLAPJoinRel 的 implement 函数的实现则是直接使用executeOLAPQuery函数
+
         if (context.hasJoin == false && tableName.equalsIgnoreCase(context.realization.getFactTable()) == false) {
             return "executeLookupTableQuery";
         } else {
