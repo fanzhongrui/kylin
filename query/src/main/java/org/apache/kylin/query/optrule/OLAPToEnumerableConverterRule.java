@@ -26,6 +26,7 @@ import org.apache.kylin.query.relnode.OLAPRel;
 import org.apache.kylin.query.relnode.OLAPToEnumerableConverter;
 
 /**
+ *
  */
 public class OLAPToEnumerableConverterRule extends ConverterRule {
 
